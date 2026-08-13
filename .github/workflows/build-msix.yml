@@ -1,0 +1,50 @@
+name: Build MSIX
+
+# Runs automatically on every push to main, on every pull request,
+# and can also be triggered manually from the Actions tab ("Run workflow").
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build MSIX package
+        run: npm run dist
+
+      - name: Locate build output
+        id: find_msix
+        shell: pwsh
+        run: |
+          $file = Get-ChildItem -Path dist -Filter *.appx -Recurse | Select-Object -First 1
+          if (-not $file) {
+            $file = Get-ChildItem -Path dist -Filter *.msix -Recurse | Select-Object -First 1
+          }
+          if (-not $file) {
+            throw "No .appx or .msix file was produced. Check the build step output above."
+          }
+          echo "path=$($file.FullName)" >> $env:GITHUB_OUTPUT
+          echo "name=$($file.Name)" >> $env:GITHUB_OUTPUT
+
+      - name: Upload MSIX as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GoogleCalendar-MSIX
+          path: ${{ steps.find_msix.outputs.path }}
+          if-no-files-found: error
