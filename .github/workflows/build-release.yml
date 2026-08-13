@@ -1,0 +1,52 @@
+name: Build and release Windows app
+
+# Builds a downloadable Windows .exe on every push to main and publishes it
+# to a GitHub Release ("latest"), so anyone can grab it straight from the
+# repo's Releases page without needing to build it themselves.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Package the Windows app
+        run: npm run package-win
+
+      - name: Zip the app folder
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "dist/GoogleCalendar-win32-x64/*" -DestinationPath "GoogleCalendar-Windows.zip"
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: Google Calendar Desktop (latest build)
+          body: |
+            Automatically built from the latest commit on `main`.
+
+            **How to use it:** download `GoogleCalendar-Windows.zip` below,
+            unzip it anywhere, and run `GoogleCalendar.exe`. No installer,
+            no admin rights needed.
+          files: GoogleCalendar-Windows.zip
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

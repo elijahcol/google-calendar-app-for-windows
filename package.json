@@ -8,50 +8,13 @@
   "license": "MIT",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder --win appx",
+    "package-win": "electron-packager . GoogleCalendar --platform=win32 --arch=x64 --icon=icon.ico --out=dist --overwrite --app-copyright=\"Personal use\"",
     "build-icons": "node scripts/build-icons.js"
   },
   "devDependencies": {
     "electron": "^31.7.7",
-    "electron-builder": "^24.13.3",
     "electron-packager": "^17.1.2",
     "png-to-ico": "^2.1.8",
     "sharp": "^0.33.4"
-  },
-  "build": {
-    "appId": "com.yourname.googlecalendardesktop",
-    "productName": "Google Calendar",
-    "directories": {
-      "output": "dist"
-    },
-    "files": [
-      "main.js",
-      "iconTemplate.js",
-      "icon-render.html",
-      "package.json"
-    ],
-    "win": {
-      "target": [
-        {
-          "target": "appx",
-          "arch": [
-            "x64"
-          ]
-        }
-      ],
-      "icon": "icon1024.png"
-    },
-    "appx": {
-      "applicationId": "GoogleCalendarDesktop",
-      "identityName": "YourPublisherAlias.GoogleCalendarDesktop",
-      "publisher": "CN=00000000-0000-0000-0000-000000000000",
-      "publisherDisplayName": "Your Publisher Display Name",
-      "displayName": "Google Calendar",
-      "backgroundColor": "#4285F4",
-      "languages": [
-        "en-US"
-      ],
-      "showNameOnTiles": true
-    }
   }
 }
